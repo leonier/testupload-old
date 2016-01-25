@@ -1,0 +1,27 @@
+<h3>Friend <%=@frienduser.name%>'s public files</h3>
+
+<% unless @publicfiles.blank? %>
+<table>
+	<tr>
+		<th>Filename</th>
+		<th>Size</th>
+		<th>Upload Date and Time</th>
+	</tr>
+	<% @publicfiles.each do |file|%>
+	<%	
+		uptime=file.uploadtime.strftime("%Y.%m.%d %H:%M:%S")
+		downfilename=file.id.to_s + "_"+ file.uploadtime.strftime("%Y%m%d%H%M%S")+File.extname(file.filename)
+		fullpath=Rails.root.join('uploads', downfilename)
+		size=File.size(fullpath)
+	%>
+	<tr>
+		<td><a href="/uptest_download?file_id=<%= file.id %>"><%= file.filename %></a></td>
+		<td><%= number_to_human_size(size) %> </td>
+		<td><%= uptime %></td>
+	</tr>
+	<% end %>
+</table>
+<% else %>
+<div><%=@frienduser.name%> don't have any public files!</div>
+<% end %>
+<div><a href="/">Back to index</a></div>

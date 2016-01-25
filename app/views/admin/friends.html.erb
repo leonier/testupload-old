@@ -1,0 +1,90 @@
+<script language="JavaScript">
+var friends=[];
+var friendstodelete=[];
+function AddPresenter(id)
+{
+	var form=document.getElementById('presenter_form');
+	var sel=document.getElementById('newpresenter'+id);
+	//alert(sel.options[sel.selectedIndex].innerHTML);
+	var ftd=document.getElementById('presenters'+id);
+	//var postvalue=document.getElementById('newfriend_json');
+	var lst=ftd.innerHTML;
+	var selectedindex=sel.selectedIndex;
+	var targetvalue=sel.value;
+	//Add friend to list
+	lst+=sel.options[selectedindex].innerHTML+'&nbsp;';
+	ftd.innerHTML=lst;
+	
+	//Remove selection
+	sel.removeChild( sel.options[selectedindex] );
+	
+	//Push into JSON array
+	var newfriend={source: id, target:targetvalue}
+	friends.push(newfriend);
+}
+function setFriendDelete(id)
+{
+	var txt=document.getElementById('fid'+id);
+	txt.style.textDecoration='line-through';
+	newfriendtodelete={fid: id};
+	friendstodelete.push(newfriendtodelete);
+}
+function postBatchForm()
+{
+	var sFriends=JSON.stringify(friends);
+	var sFriendstodelete=JSON.stringify(friendstodelete);
+	var eFriends=document.getElementById('newfriend_json');
+	var eFriendstodelete=document.getElementById('delfriend_json');
+	eFriends.value=sFriends;
+	eFriendstodelete.value=sFriendstodelete;
+	document.getElementById("presenter_form").submit();
+}
+</script>
+Friends Admin page <br />
+Administrator: <%= @admin.name %> <a href="/admin/logout">Logout </a>
+<div style="color: Red;"><%= flash[:error] %></div>
+<% unless @users.empty? %>
+<table>
+<tr>
+	<th>User name</th>
+	<th>Friends</th>
+	<th style="width: 8em;">Admin</th>
+</tr>
+<% @users.each do |user| %>
+		<%
+			allusers=User.all
+			allusers.delete_if{|userx| userx.id==user.id}
+			friends=Friend.where(:source_id=>user.id)
+			friends.each do |friends|
+				allusers.delete_if{|userx| userx.id==friends.target_id}
+			end
+		%>
+<tr class="hoverparent">
+<td><%= user.name %></td>
+<td><div id="presenters<%= user.id %>">
+<% user.friend.each do |friend| %>
+<div class="horizonal-div" id="fid<%=friend.id %>"><%= friend.target.name %></div><a href="#" onclick="setFriendDelete(<%=friend.id %>);return false;">X</a>
+<% end %>
+</div>
+</td>
+<td class="hiddenchild">
+	<select id="newpresenter<%= user.id %>">
+		<%allusers.each do |user2| %>
+			<option value="<%= user2.id %>"><%= user2.name %></option>
+		<% end %>
+	</select>
+	<input type="button" id="addpresenter<%= user.id %>" value="+" onclick="AddPresenter(<%= user.id %>)">
+</td>
+</tr>
+<% end %>
+</table>
+<% end %>
+
+
+<%= form_tag({:controller=>'user',:action=>'batchaddfriend'},{:id => "presenter_form"}) do %>
+<%= hidden_field_tag 'newfriend_json' %>
+<%= hidden_field_tag 'delfriend_json' %>
+<%= button_tag 'Save', :type=>'button', :onclick=>'postBatchForm();' %>
+<% end %>
+
+<a href="/admin/">Administration</a>

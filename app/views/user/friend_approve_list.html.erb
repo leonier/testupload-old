@@ -1,0 +1,47 @@
+<script language="JavaScript">
+var friends=[];
+function Approve(id)
+{
+	newapprove={fid: id, approve: 1}
+	friends.push(newapprove);
+	tstyle=document.getElementById('fname_'+id).style;
+	tstyle.backgroundColor='green';
+	tstyle.color='white';
+}
+function Refuse(id)
+{
+	newrefuse={fid: id, refuse: 1}
+	friends.push(newrefuse);
+	tstyle=document.getElementById('fname_'+id).style;
+	tstyle.textDecoration='line-through';
+}
+function postBatchForm()
+{
+	var sFriends=JSON.stringify(friends);
+	var eFriends=document.getElementById('friend_json');
+	eFriends.value=sFriends;
+	document.getElementById("approve_form").submit();
+}
+</script>
+<h3><%= @user.name %>'s unapproved friend requests</h3>
+<% unless @targetfriend.empty? %>
+<table>
+<tr>
+	<th>User name</th>
+	<th style="width: 8em;">Approve Options</th>
+</tr>
+
+<%@targetfriend.each do |friend|%>
+<tr class="hoverparent">
+<td><div id="fname_<%= friend.id %>"><%= friend.source.name %></div></td>
+
+<td class="hiddenchild"><%= link_to_function "Approve", "Approve("+friend.id.to_s+");" %>&nbsp;<%= link_to_function "Refuse", "Refuse("+friend.id.to_s+");" %></td>
+</tr>
+<% end %>
+</table>
+<% end %>
+<%= form_tag({:controller=>'user',:action=>'friend_approve'},{:id => "approve_form"}) do %>
+<%= hidden_field_tag 'friend_json' %>
+<%= button_tag 'Submit', :type=>'button', :onclick=>'postBatchForm();' %>
+<% end %>
+<a href="/">Back to Index</a>

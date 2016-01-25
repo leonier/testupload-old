@@ -1,0 +1,41 @@
+<h3><%= @user.name %>'s Friends</h3>
+
+<table>
+<tr><th>Name</th><th>Approved</th><th>Admin</th></tr>
+<% @friends.each do |friend| %>
+	<%= form_tag( {:action => 'friend_delete'}, {:id=>"delf_"+friend.id.to_s}) do %>
+		<%= hidden_field_tag 'fid', friend.id %>
+	<% end %>
+<tr class="hoverparent">
+<td>
+<% if friend.approved %>
+<a href="/friendfile?fid=<%=friend.id %>"><%= friend.target.name %></a>
+<% else %>
+<%= friend.target.name %>
+<% end %>
+</td>
+<td>
+<% if friend.approved %>Yes
+<% else %>No<% end %>
+</td>
+<td class="hiddenchild"><%= link_to_function "Delete", "popupConfirmDialogwithPost('confirm', confirmDeleteFriend, 'delf_"+friend.id.to_s+"');" %></td>
+</tr>
+<% end %>
+</table>
+
+<div>
+<div class="horizonal-div">Add friend:</div>
+<div class="horizonal-div">
+	<%= form_tag( {:action => 'friend_add'} ) do %>
+	<select name="target_id">
+		<% @allusers.each do |user2| %>
+			<option value="<%= user2.id %>"><%= user2.name %></option>
+		<% end %>
+	</select>
+	<%= submit_tag 'Submit' %>
+	<% end %>
+</div>
+</div>
+<div><a href="/">Return to Index</a></div>
+<!-- Process popup window for confirm dialog -->
+<%= render partial: "confirm_popup" %>
