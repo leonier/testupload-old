@@ -2,14 +2,30 @@
 	<tr>
 		<th>Filename</th>
 		<th>Size</th>
+		<th>Uploader</th>
 		<th>Upload Date and Time</th>
 	</tr>
 	<tr>
 		<td><%= @filename %></td>
 		<td><%= number_to_human_size(@size) %> </td>
+		<td><%= @fileuser.name %></td>
 		<td><%= @uptime %></td>
 	</tr>
 </table>
 <% if @public == 1 %>
-	<a href="/uptest_download?file_id=<%= @fileid %>">Download</a>
+	<% if @isfriend %>
+	<div>This file comes from your friend, 
+	<% if @friend.approved %><a href="/friendfile?fid=<%=@friend.id %>"><%= @fileuser.name %></a>
+	<% else %><%= @fileuser.name %><% end %>
+	</div>
+	<% end %>
+	<div><a href="/uptest_download?file_id=<%= @fileid %>">Download</a></div>
+	<% if session[:user_id].blank? == false and @fileuser.id != session[:user_id] and @isfriend == false %>
+		<%= form_tag( {:controller=>'user', :action => 'friend_add'},{:id=>'addfriend_form'} ) do %>
+			<%= hidden_field_tag 'target_id', @fileuser.id %>
+		<% end %>
+		<div><a href="#" onclick="popupConfirmDialogwithPost('confirm',confirmAddFriend,'addfriend_form');return false;">Add uploader as friend</a></div>
+<!-- Process popup window for confirm dialog -->
+<%= render partial: "confirm_popup" %>		
+	<% end %>
 <% end %>

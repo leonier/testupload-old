@@ -98,7 +98,7 @@ class UptestController < ApplicationController
 		publiclink = 0
 		@public = 0
 		@fileid = 0
-		
+		@isfriend = false
 		if params[:id] == nil
 			if params[:b64] != nil
 			begin  
@@ -135,6 +135,13 @@ class UptestController < ApplicationController
 		if publiclink == 1 and myfile.public == 1
 			@public = 1
 			@fileid=fileid
+		end
+		@fileuser=myfile.user
+		if session[:user_id] != nil
+			@friend = Friend.where(:source_id=>session[:user_id], :target_id=>@fileuser.id).first
+			unless @friend.blank?
+				@isfriend = true
+			end
 		end
 		@filename=myfile.filename
 		@uptime=myfile.uploadtime.strftime("%Y.%m.%d %H:%M:%S")
@@ -226,7 +233,12 @@ class UptestController < ApplicationController
 			@error="No such friend ID!"
 			render "error"
 			return
-		end		
+		end	
+		unless friend.approved
+			@error="Friend unapproved!"
+			render "error"
+			return		
+		end
 		@frienduser=friend.target
 		@publicfiles=@frienduser.uptest.where(:public=>1)
 	end
